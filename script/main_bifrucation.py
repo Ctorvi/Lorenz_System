@@ -12,39 +12,133 @@ from mpl_toolkits.mplot3d import axes3d
 from matplotlib.animation import FuncAnimation
  
 
-initial_states = [[1.01,1,1]]
 
-rho_values = np.linspace(0, 50, 100)
+t_init = 0
+t_final = 200
 
-results, rho_plot, z_plot = maxima_Z_fast(
-    initial_state=[1, 1, 1],
-    rho_values=rho_values,
-    t_span=(0, 200),
-    t_transient=100,
-)
 
-data = np.column_stack((rho_plot, z_plot))
+rho_values = [0,50,100,150,200,250,300,350,400]
 
-np.savetxt(
-    "lorenz_bifurcation_0_100.csv",
-    data,
-    delimiter=",",
-    header="rho,z_max",
-    comments="",
-)
 
-### reload datas ###
+###### FIRST BRANCH #######
 
-# data = np.loadtxt(
-#     "lorenz_bifurcation.csv",
+###initial_states = [[1.,1,1]]
+
+### COMPUTING ###
+
+# for rho in rho_values:
+ 
+ 
+#  results, rho_plot, z_plot = maxima_Z_fast(
+#         initial_state=initial_states,
+#         rho_values=np.linspace(rho, rho + 50, 400),
+#         t_span=(t_init, t_final),
+#         t_transient=100,
+#         sigma=10.0,
+#         beta=8 / 3,
+#     )
+
+#  data = np.column_stack((rho_plot, z_plot))
+
+#  np.savetxt(
+#     f"lorenz_bifurcation_{rho}_{rho + 50}.csv",
+#     data,
 #     delimiter=",",
-#     skiprows=1,
-# )
+#     header="rho,z_max",
+#     comments="", 
+#  )
 
-# rho_plot = data[:, 0]
-# z_plot = data[:, 1]
+#  plt.scatter(rho_plot, z_plot, s=1, color="black")
+#  plt.xlabel(r"$\rho$")
+#  plt.ylabel(r"$z_{\max}$")
 
-# plt.scatter(rho_plot, z_plot, s=1, color="black")
-# plt.xlabel(r"$\rho$")
-# plt.ylabel(r"$z_{\max}$")
+
+
+
+### LOADING AND PLOTTING ###
+
+plt.figure(figsize=(14, 7))
+
+for rho in rho_values[:-2]:
+ 
+ data = np.loadtxt(
+    f"data_bifurcation/upper_branch/lorenz_bifurcation_{rho}_{rho + 50}.csv",
+    delimiter=",",
+    skiprows=1,
+ )
+
+ rho_plot = data[:, 0]
+ z_plot = data[:, 1]
+
+ plt.scatter(rho_plot, z_plot, s=0.0001, color="black")
+
+ plt.xlabel(r"$\rho$")
+ plt.ylabel(r"$z_{\max}$")
+
 # plt.show()
+
+
+
+
+###### SECOND BRANCH #######
+
+# initial_states = [-1.,-1,1]
+
+# ## COMPUTING ###
+
+# for rho in rho_values:
+ 
+ 
+#  results, rho_plot, z_plot = maxima_Z_fast(
+#         initial_state=initial_states,
+#         rho_values=np.linspace(rho, rho + 50, 400),
+#         t_span=(t_init, t_final),
+#         t_transient=100,
+#         sigma=10.0,
+#         beta=8 / 3,
+#     )
+
+#  data = np.column_stack((rho_plot, z_plot))
+
+#  np.savetxt(
+#     f"data_bifurcation/lower_branch/lorenz_bifurcation_{rho}_{rho + 50}.csv",
+#     data,
+#     delimiter=",",
+#     header="rho,z_max",
+#     comments="", 
+#  )
+
+#  plt.scatter(rho_plot, z_plot, s=1, color="black")
+#  plt.xlabel(r"$\rho$")
+#  plt.ylabel(r"$z_{\max}$")
+
+
+
+
+## LOADING AND PLOTTING ###
+
+# plt.figure(figsize=(14, 7))
+
+for rho in rho_values[:-6]:
+ 
+ data = np.loadtxt(
+    f"data_bifurcation/lower_branch/lorenz_bifurcation_{rho}_{rho + 50}.csv",
+    delimiter=",",
+    skiprows=1,
+ )
+
+ rho_plot = data[:, 0]
+ z_plot = data[:, 1]
+
+ plt.scatter(rho_plot, z_plot, s=0.0001, color="red")
+
+ plt.xlabel(r"$\rho$")
+ plt.ylabel(r"$z_{\max}$")
+
+plt.savefig("bifurcation_diagram.png", dpi=300, bbox_inches='tight')
+
+plt.show()
+
+
+
+
