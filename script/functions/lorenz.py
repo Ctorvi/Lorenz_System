@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 from matplotlib.animation import FuncAnimation
+import seaborn as sns
 
 def lorenz(t, state, sigma=10.0, rho=28.0, beta=8/3):
     x, y, z = state
@@ -233,6 +234,7 @@ def animate_lorenz_rho_comparison(
      subplot_kw={"projection": "3d"},
      squeeze=False,
     )
+    fig.patch.set_facecolor("black")
 
 # Conversion de la grille d'axes en une liste
     axes = axes_grid.ravel()
@@ -281,10 +283,11 @@ def animate_lorenz_rho_comparison(
         for rho_solutions in solutions
     ]
 
-    colors = plt.cm.viridis(
-        np.linspace(0, 1, len(initial_states))
-    )
+    
+    colors = sns.color_palette(
+     "husl", n_colors=len(initial_states))
 
+    
     # Contiendra les courbes et les points de chaque axe
     trajectories = []
     points = []
@@ -321,23 +324,45 @@ def animate_lorenz_rho_comparison(
         all_z.min() - z_margin,
         all_z.max() + z_margin,
      )
-
-     ax.set_xlabel("x")
-     ax.set_ylabel("y")
-     ax.set_zlabel("z")
-     ax.set_title(rf"$\rho = {rho:g}$")
+     ax.text2D(
+         0.5,
+         -0.08,
+         rf"$\rho = {rho:g}$",
+         transform=ax.transAxes,
+         color="white",
+         ha="center",
+         fontsize=14,
+     )
 
      rho_trajectories = []
      rho_points = []
 
      for index, color in enumerate(colors):
+        if interval is None:
+            x, y, z = rho_solutions[index]
+            ax.plot(
+                x,
+                y,
+                z,
+                color=color,
+                linewidth=0.3,
+                label=(
+                    rf"$\vec{{r}}_0 = ({initial_states[index, 0]:g}, "
+                    f"{initial_states[index, 1]:g}, {initial_states[index, 2]:g})$"
+                ),
+            )
+            continue
+
         trajectory, = ax.plot(
             [],
             [],
             [],
             color=color,
-            linewidth=0.8,
-            label=f"CI {index + 1}",
+            linewidth=0.3,
+                        label=
+                                rf"$\vec{{r}}_0 = ({initial_states[index, 0]:g}, "
+                                f"{initial_states[index, 1]:g}, {initial_states[index, 2]:g})$"
+                        ,
           )
 
         point, = ax.plot(
@@ -355,14 +380,40 @@ def animate_lorenz_rho_comparison(
      trajectories.append(rho_trajectories)
      points.append(rho_points)
 
+    for ax in axes:
+      ax.set_facecolor("black"); ax.tick_params(length=0, labelsize=0)
+      ax.set_xlabel("")
+      ax.set_ylabel("")
+      ax.set_zlabel("")
+      ax.grid(True)
+      for axis in (ax.xaxis, ax.yaxis, ax.zaxis):
+       axis._axinfo["grid"].update(
+           color=(1.0, 1.0, 1.0, 0.18),
+           linewidth=0.7,
+       )
+       axis.pane.set_facecolor((0.0, 0.0, 0.0, 1.0))
+       axis.pane.set_edgecolor((0.0, 0.0, 0.0, 0.0))
+      ax.title.set_color("white")
+
     #  trajectories.append(rho_trajectories)
     #  points.append(rho_points)
     # Une seule légende suffit puisque les conditions initiales sont identiques
-    axes[0].legend()
+    axes[0].legend(facecolor="black", edgecolor="white", labelcolor="white")
 
-    time_text = fig.suptitle(
-    f"Système de Lorenz — t = {t_display[0]:.2f}"
+    title = (
+        f"Système de Lorenz — t : {t_transient:g} à {t_span[1]:g}"
+        if interval is None
+        else f"Système de Lorenz — t = {t_display[0]:.2f}"
     )
+    time_text = fig.suptitle(
+    title,
+    color="white",
+    )
+
+    if interval is None:
+        fig.canvas.manager.full_screen_toggle()
+        plt.show()
+        return fig, None
 
     def update(frame):
         artists = []
@@ -407,7 +458,8 @@ def animate_lorenz_rho_comparison(
         blit=False,
     )
 
-    fig.tight_layout()
+    fig.canvas.manager.full_screen_toggle()
+    # fig.tight_layout()
     plt.show()
 
     return fig, animation

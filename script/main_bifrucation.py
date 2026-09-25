@@ -58,13 +58,16 @@ rho_values = [0,50,100,150,200,250,300,350,400]
 ### LOADING AND PLOTTING ###
 
 plt.figure(figsize=(14, 7))
+plt.rcParams.update({"font.size": 16})
+plt.tick_params(axis="both", labelsize=16)
+plt.title("Lorenz System pseudo-bifurcation diagram", fontsize=24, pad=16)
 
 for rho in rho_values[:-2]:
  
  data = np.loadtxt(
     f"data_bifurcation/upper_branch/lorenz_bifurcation_{rho}_{rho + 50}.csv",
     delimiter=",",
-    skiprows=1,
+    skiprows=1,   
  )
 
  rho_plot = data[:, 0]
@@ -72,18 +75,21 @@ for rho in rho_values[:-2]:
 
  plt.scatter(rho_plot, z_plot, s=0.0001, color="black")
 
- plt.xlabel(r"$\rho$")
- plt.ylabel(r"$z_{\max}$")
+ plt.xlabel(r"$\rho$", fontsize=20)
+ plt.ylabel(r"$Z_{\max}$", fontsize=20)
 
-# plt.show()
+plt.xlim(0, 350)
+plt.ylim(0, 400)
 
+plt.savefig("bifurcation_diagram.png", dpi=300, bbox_inches='tight')
 
+plt.show()
 
 
 ###### SECOND BRANCH #######
 
 # initial_states = [-1.,-1,1]
-
+ 
 # ## COMPUTING ###
 
 # for rho in rho_values:
@@ -119,25 +125,25 @@ for rho in rho_values[:-2]:
 
 # plt.figure(figsize=(14, 7))
 
-for rho in rho_values[:-6]:
+# for rho in rho_values[:-6]:
  
- data = np.loadtxt(
-    f"data_bifurcation/lower_branch/lorenz_bifurcation_{rho}_{rho + 50}.csv",
-    delimiter=",",
-    skiprows=1,
- )
+#  data = np.loadtxt(
+#     f"data_bifurcation/lower_branch/lorenz_bifurcation_{rho}_{rho + 50}.csv",
+#     delimiter=",",
+#     skiprows=1,
+#  )
 
- rho_plot = data[:, 0]
- z_plot = data[:, 1]
+#  rho_plot = data[:, 0]
+#  z_plot = data[:, 1]
 
- plt.scatter(rho_plot, z_plot, s=0.0001, color="red")
+#  plt.scatter(rho_plot, z_plot, s=0.0001, color="red")
 
- plt.xlabel(r"$\rho$")
- plt.ylabel(r"$z_{\max}$")
+#  plt.xlabel(r"$\rho$", fontsize=20)
+#  plt.ylabel(r"$z_{\max}$", fontsize=20)
 
-plt.savefig("bifurcation_diagram.png", dpi=300, bbox_inches='tight')
+# plt.savefig("bifurcation_diagram.png", dpi=300, bbox_inches='tight')
 
-plt.show()
+# plt.show()
 
 
 
