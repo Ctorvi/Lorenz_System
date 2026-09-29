@@ -4,15 +4,15 @@ An independent exploration of the Lorenz system through numerical simulations, t
 
 ## 1. Bifurcation Diagram
 
-To explore how the system changes with the parameter \(\rho\), I numerically integrate trajectories for a range of values of \(\rho\). After discarding an initial transient, I record the local maxima of \(z(t)\) and plot them against \(\rho\).
+To explore how the system changes with the parameter $\rho\$, I numerically integrate trajectories for a range of values of $\rho\$. After discarding an initial transient, I record the local maxima of \(z(t)\) and plot them against $\rho\$.
 
-This plot helps identify parameter ranges with different long-term behaviour. A finite set of recurring \(z\)-maxima can suggest a periodic orbit, which can then be examined by plotting the corresponding trajectory. The figure below shows the maxima plot alongside trajectories for selected values of \(\rho\).
+This plot helps identify parameter ranges with different long-term behaviour. A finite set of recurring \(z\)-maxima can suggest a periodic orbit, which can then be examined by plotting the corresponding trajectory. The figure below shows the maxima plot alongside trajectories for selected values of $\rho\$.
 
 ![Local maxima of z versus rho, with selected Lorenz trajectories](figures/bifurcation_diagram.png)
 
 ## 2. Polyrhythmic Lorenz Orchestra
 
-This experiment turns simulated Lorenz trajectories into an audiovisual animation. Several trajectories, computed with different values of \(\rho\), evolve side by side. Their motion is mapped to sound, so each trajectory contributes a changing tone to the combined audio.
+This experiment turns simulated Lorenz trajectories into an audiovisual animation. Several trajectories, computed with different values of $\rho\$, evolve side by side. Their motion is mapped to sound, so each trajectory contributes a changing tone to the combined audio.
 
 The video lets you see and hear how the trajectories evolve together.
 
