@@ -14,7 +14,7 @@ This plot helps identify parameter ranges with different long-term behaviour. A 
 
 ## 2. Polyrhythmic Lorenz Orchestra
 
-This experiment turns simulated Lorenz trajectories into an audiovisual animation. Several trajectories, computed with different values of $\rho\$, evolve side by side. Their motion is mapped to sound, so each trajectory contributes a changing tone to the combined audio.
+This experiment turns simulated Lorenz trajectories into an audiovisual animation. Trajectories computed for different values of $\rho$ evolve side by side. The angular velocity of each trajectory’s projection controls the pitch of its sound, creating a combination of changing tones.
 
 The video lets you see and hear how the trajectories evolve together.
 
