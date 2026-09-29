@@ -8,7 +8,7 @@ To explore how the system changes with the parameter $\rho\$, I numerically inte
 
 This plot helps identify parameter ranges with different long-term behaviour. A finite set of recurring \(z\)-maxima can suggest a periodic orbit, which can then be examined by plotting the corresponding trajectory. The figure below shows the maxima plot alongside trajectories for selected values of $\rho\$.
 
-![Local maxima of z versus rho, with selected Lorenz trajectories](figures/bifurcation_diagram.png)
+![Local maxima of z versus rho, with selected Lorenz trajectories](figures/Lorenz_rho_comparison_w_bifurcation.png)
 
 ## 2. Polyrhythmic Lorenz Orchestra
 
