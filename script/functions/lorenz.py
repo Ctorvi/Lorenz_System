@@ -19,7 +19,8 @@ def z_maximum_event(t, state, sigma, rho, beta):
     return x * y - beta * z   # dz/dt
 
 def evolve_lorenz(initial_state, t_span, t_eval, args=(10.0, 28.0, 8/3)):
-    solution = solve_ivp(lorenz, t_span, initial_state, t_eval=t_eval, args=args)
+    solution = solve_ivp(lorenz, t_span, initial_state, t_eval=t_eval, args=args, rtol=1e-7,
+    atol=1e-9)
     return solution.y, solution.t
 
 
@@ -398,7 +399,17 @@ def animate_lorenz_rho_comparison(
     #  trajectories.append(rho_trajectories)
     #  points.append(rho_points)
     # Une seule légende suffit puisque les conditions initiales sont identiques
-    axes[0].legend(facecolor="black", edgecolor="white", labelcolor="white")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        loc="center left",
+        bbox_to_anchor=(0.82, 0.5),
+        facecolor="black",
+        edgecolor="white",
+        labelcolor="white",
+    )
+    fig.subplots_adjust(right=0.8)
 
     title = (
         f"Système de Lorenz — t : {t_transient:g} à {t_span[1]:g}"
@@ -462,6 +473,302 @@ def animate_lorenz_rho_comparison(
     # fig.tight_layout()
     plt.show()
 
+    return fig, animation
+
+
+def animate_lorenz_rho_bifurcation_comparison(
+    initial_states,
+    rho_values,
+    t_span,
+    t_eval,
+    bifurcation_data_dir="data_bifurcation/upper_branch",
+    sigma=10.0,
+    beta=8 / 3,
+    interval=10,
+    frame_step=1,
+    t_transient=0,
+):
+    """Animate a bifurcation diagram above two rows of Lorenz trajectories."""
+    from pathlib import Path
+    from matplotlib.gridspec import GridSpec
+    from matplotlib.lines import Line2D
+
+    initial_states = np.asarray(initial_states, dtype=float)
+    rho_values = np.asarray(rho_values, dtype=float)
+    t_eval = np.asarray(t_eval, dtype=float)
+
+    if initial_states.ndim == 1:
+        initial_states = initial_states[np.newaxis, :]
+
+    if initial_states.ndim != 2 or initial_states.shape[1] != 3:
+        raise ValueError(
+            "initial_states doit être de forme (3,) ou (n, 3)."
+        )
+    if rho_values.ndim != 1 or len(rho_values) == 0:
+        raise ValueError("rho_values doit contenir au moins une valeur.")
+    if len(t_eval) < 2 or np.any(np.diff(t_eval) <= 0):
+        raise ValueError("t_eval doit contenir au moins deux temps croissants.")
+    if not 0 <= t_transient <= t_eval[-1]:
+        raise ValueError("t_transient doit être compris dans t_eval.")
+
+    bifurcation_path = Path(bifurcation_data_dir)
+    data_files = sorted(
+        bifurcation_path.glob("lorenz_bifurcation_*.csv")
+    )
+    if not data_files:
+        raise FileNotFoundError(
+            f"Aucun fichier de bifurcation trouvé dans {bifurcation_path}."
+        )
+
+    bifurcation_data = np.vstack([
+        np.loadtxt(file, delimiter=",", skiprows=1)
+        for file in data_files
+    ])
+    bifurcation_rho = bifurcation_data[:, 0]
+    bifurcation_z = bifurcation_data[:, 1]
+
+    solutions = []
+    for rho in rho_values:
+        rho_solutions = [
+            evolve_lorenz(
+                initial_state,
+                t_span,
+                t_eval,
+                args=(sigma, rho, beta),
+            )[0]
+            for initial_state in initial_states
+        ]
+        solutions.append(rho_solutions)
+
+    transient_mask = t_eval >= t_transient
+    t_display = t_eval[transient_mask]
+    solutions = [
+        [
+            (x[transient_mask], y[transient_mask], z[transient_mask])
+            for x, y, z in rho_solutions
+        ]
+        for rho_solutions in solutions
+    ]
+
+    n_columns = max(1, int(np.ceil(len(rho_values) / 2)))
+    fig = plt.figure(
+        figsize=(4.8 * n_columns, 10),
+        facecolor="black",
+    )
+    grid = GridSpec(
+        2,
+        n_columns,
+        figure=fig,
+        height_ratios=[1.6, 2.8],
+        hspace=0.4,
+        wspace=0.2,
+    )
+    trajectory_grid = grid[1, :].subgridspec(
+        2,
+        n_columns,
+        hspace=0.12,
+        wspace=0.2,
+    )
+
+    panel_colors = plt.cm.viridis(
+        np.linspace(0.05, 0.95, len(rho_values))
+    )
+    trajectory_colors = sns.color_palette(
+        "husl",
+        n_colors=len(initial_states),
+    )
+
+    bifurcation_ax = fig.add_subplot(grid[0, :])
+    bifurcation_ax.set_facecolor("black")
+    bifurcation_ax.scatter(
+        bifurcation_rho,
+        bifurcation_z,
+        s=0.0001,
+        marker=".",
+        color="white",
+    )
+    for rho, color in zip(rho_values, panel_colors):
+        bifurcation_ax.axvline(
+            rho,
+            color=color,
+            linewidth=1.2,
+            alpha=0.95,
+        )
+
+    bifurcation_ax.set_xlim(0, 350)
+    bifurcation_ax.set_ylim(0, 400)
+    bifurcation_ax.set_xlabel(r"$\rho$", color="white")
+    bifurcation_ax.set_ylabel(r"$Z_{\max}$", color="white")
+    bifurcation_ax.set_title(
+        "Diagramme de bifurcation",
+        color="white",
+        pad=10,
+    )
+    bifurcation_ax.tick_params(colors="white")
+    for spine in bifurcation_ax.spines.values():
+        spine.set_color("white")
+
+    trajectories = []
+    points = []
+    trajectory_axes = []
+
+    for rho_index, (rho, rho_solutions) in enumerate(
+        zip(rho_values, solutions)
+    ):
+        row = 1 + rho_index // n_columns
+        column = rho_index % n_columns
+        ax = fig.add_subplot(
+            trajectory_grid[row - 1, column],
+            projection="3d",
+        )
+        trajectory_axes.append(ax)
+        ax.set_facecolor("black")
+
+        all_x = np.concatenate([x for x, y, z in rho_solutions])
+        all_y = np.concatenate([y for x, y, z in rho_solutions])
+        all_z = np.concatenate([z for x, y, z in rho_solutions])
+
+        def axis_limits(values):
+            margin = 0.05 * max(np.ptp(values), 1.0)
+            return values.min() - margin, values.max() + margin
+
+        ax.set_xlim(*axis_limits(all_x))
+        ax.set_ylim(*axis_limits(all_y))
+        ax.set_zlim(*axis_limits(all_z))
+        ax.text2D(
+            0.5,
+            -0.08,
+            rf"$\rho = {rho:g}$",
+            transform=ax.transAxes,
+            color=panel_colors[rho_index],
+            ha="center",
+            va="top",
+        )
+        ax.tick_params(colors="white", labelsize=0, length=0)
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        ax.set_zticklabels([])
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.set_zlabel("")
+        ax.grid(True)
+        for axis in (ax.xaxis, ax.yaxis, ax.zaxis):
+            #axis.line.set_linewidth(0.4)
+            axis._axinfo["grid"].update(
+                color=(1.0, 1.0, 1.0, 0.18),
+                linewidth=0.4,
+            )
+            axis.pane.set_facecolor((0.0, 0.0, 0.0, 1.0))
+            axis.pane.set_edgecolor((0.0, 0.0, 0.0, 0.0))
+
+        rho_trajectories = []
+        rho_points = []
+        for index, color in enumerate(trajectory_colors):
+            trajectory, = ax.plot(
+                [],
+                [],
+                [],
+                color=color,
+                linewidth=0.1,
+                label=(
+                    rf"$\vec{{r}}_0 = ({initial_states[index, 0]:g}, "
+                    f"{initial_states[index, 1]:g}, "
+                    f"{initial_states[index, 2]:g})$"
+                ),
+            )
+            point, = ax.plot(
+                [], [], [], marker="o", color=color, markersize=4
+            )
+            rho_trajectories.append(trajectory)
+            rho_points.append(point)
+
+        trajectories.append(rho_trajectories)
+        points.append(rho_points)
+
+    for empty_index in range(len(rho_values), 2 * n_columns):
+        row = 1 + empty_index // n_columns
+        column = empty_index % n_columns
+        fig.add_subplot(
+            trajectory_grid[row - 1, column]
+        ).set_visible(False)
+
+    fig.subplots_adjust(
+        left=0.0625,
+        right=0.95,
+        top=0.93,
+    )
+    title_y = trajectory_axes[0].get_position().y1 + 0.02
+    title = fig.text(
+        0.32,
+        title_y,
+        f"Système de Lorenz — t = {t_display[0]:.2f}",
+        color="white",
+        ha="center",
+        va="bottom",
+    )
+    handles, labels = trajectory_axes[0].get_legend_handles_labels()
+    legend_handles = [
+        Line2D(
+            [],
+            [],
+            color=handle.get_color(),
+            linestyle=handle.get_linestyle(),
+            linewidth=1.5,
+        )
+        for handle in handles
+    ]
+    fig.legend(
+        legend_handles,
+        labels,
+        loc="center left",
+        bbox_to_anchor=(0.62, title_y),
+        facecolor="black",
+        edgecolor="white",
+        labelcolor="white",
+        fontsize=8,
+    )
+
+    if interval is None:
+        for rho_index, rho_solutions in enumerate(solutions):
+            for trajectory, (x, y, z) in zip(
+                trajectories[rho_index],
+                rho_solutions,
+            ):
+                trajectory.set_data(x, y)
+                trajectory.set_3d_properties(z)
+        title.set_text(
+            f"Système de Lorenz — t : {t_display[0]:.2f} à "
+            f"{t_display[-1]:.2f}"
+        )
+        plt.show()
+        return fig, None
+
+    def update(frame):
+        artists = []
+        for rho_index, rho_solutions in enumerate(solutions):
+            for trajectory, point, (x, y, z) in zip(
+                trajectories[rho_index],
+                points[rho_index],
+                rho_solutions,
+            ):
+                trajectory.set_data(x[:frame + 1], y[:frame + 1])
+                trajectory.set_3d_properties(z[:frame + 1])
+                point.set_data([x[frame]], [y[frame]])
+                point.set_3d_properties([z[frame]])
+                artists.extend([trajectory, point])
+
+        title.set_text(f"Système de Lorenz — t = {t_display[frame]:.2f}")
+        artists.append(title)
+        return tuple(artists)
+
+    animation = FuncAnimation(
+        fig,
+        update,
+        frames=range(0, len(t_display), frame_step),
+        interval=interval,
+        blit=False,
+    )
+    plt.show()
     return fig, animation
 
 
