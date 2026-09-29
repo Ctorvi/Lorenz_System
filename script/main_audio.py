@@ -16,19 +16,20 @@ import sounddevice as sd
 from scipy.io.wavfile import write
 
 t_init = 0
-t_final = 40
+t_final = 20
 t_step = 1/1000
 
 t_span = (t_init, t_final)
 t_eval = np.linspace(*t_span, int((t_span[1] - t_span[0]) / t_step) + 1)
 
 export_lorenz_rho_comparison(
-    rho_values=[20,50,100.35, 150, 160, 220,250, 360],
+    # rho_values=[20,50,100.35, 150, 160, 220,250, 360],
+    rho_values=[93,100.35,133, 150, 160, 220,250, 360],
     initial_states=[[1, 1, 1]],
     t_span=t_span,
     t_eval=t_eval,
     interval=2,
-    filename="comparaison_rho.mp4",
+    filename="8_periodics.mp4",
     base_frequency=100.0,
     frequency_gain=20.0,
 )
