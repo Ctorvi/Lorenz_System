@@ -22,7 +22,7 @@ t_transient = 40
 t_span = (t_init, t_final)
 t_eval = np.linspace(*t_span, int((t_span[1] - t_span[0]) / t_step) + 1)
 
-rho_values = [50]#, 93, 100.35, 133 ,140, 150, 160,181.5, 200, 220, 270,330]
+rho_values = [50, 93, 100.35, 133 ,140, 150, 160,181.5, 200, 220, 270,330]
 
 
 # fig, animation = animate_lorenz_rho_comparison(

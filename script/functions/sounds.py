@@ -579,6 +579,21 @@ def export_lorenz_rho_comparison(
     if interval <= 0 or fps <= 0:
         raise ValueError("interval et fps doivent être positifs.")
 
+    base_frequencies = np.asarray(base_frequency, dtype=float)
+    if base_frequencies.ndim == 0:
+        base_frequencies = np.full(
+            len(rho_values),
+            base_frequencies.item(),
+        )
+    elif base_frequencies.ndim != 1 or len(base_frequencies) != len(rho_values):
+        raise ValueError(
+            "base_frequency doit être un scalaire ou un vecteur de "
+            "même longueur que rho_values."
+        )
+
+    if np.any(base_frequencies < 0):
+        raise ValueError("base_frequency doit contenir des valeurs positives.")
+
     # Calculer les mêmes conditions initiales pour chaque rho.
     panels = []
     for rho in rho_values:
@@ -660,7 +675,7 @@ def export_lorenz_rho_comparison(
     mixed_sound = np.zeros(n_samples, dtype=float)
     n_voices = len(rho_values) * len(initial_states)
 
-    for solutions in panels:
+    for base_frequency_value, solutions in zip(base_frequencies, panels):
         for x, y, z in solutions:
             dx_dt = np.gradient(x, t_eval)
             dy_dt = np.gradient(y, t_eval)
@@ -676,7 +691,7 @@ def export_lorenz_rho_comparison(
                 t_eval,
                 np.abs(omega),
             )
-            frequency = base_frequency + frequency_gain * omega_audio
+            frequency = base_frequency_value + frequency_gain * omega_audio
             frequency = np.clip(frequency, 20, 0.45 * sample_rate)
 
             phase = 2 * np.pi * np.cumsum(frequency) / sample_rate

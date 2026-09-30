@@ -16,7 +16,7 @@ import sounddevice as sd
 from scipy.io.wavfile import write
 
 t_init = 0
-t_final = 20
+t_final = 30
 t_step = 1/1000
 
 t_span = (t_init, t_final)
@@ -28,10 +28,11 @@ export_lorenz_rho_comparison(
     initial_states=[[1, 1, 1]],
     t_span=t_span,
     t_eval=t_eval,
-    interval=2,
-    filename="8_periodics.mp4",
-    base_frequency=100.0,
-    frequency_gain=20.0,
+    interval=3,
+    filename="try_periodics.mp4",
+    # Une fréquence de base par valeur de rho, dans le même ordre.
+    base_frequency=[20.0, 25.0, 30.0, 35.0, 40.0, 45.0, 50.0, 55.0],
+    frequency_gain=10.0,
 )
 
 
