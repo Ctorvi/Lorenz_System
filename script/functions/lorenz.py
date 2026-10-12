@@ -285,8 +285,11 @@ def animate_lorenz_rho_comparison(
     ]
 
     
-    colors = sns.color_palette(
-     "husl", n_colors=len(initial_states))
+    colors = sns.husl_palette(
+     n_colors=len(initial_states),
+     s=1.0,
+    l=0.82,
+    )
 
     
     # Contiendra les courbes et les points de chaque axe
@@ -559,7 +562,7 @@ def animate_lorenz_rho_bifurcation_comparison(
         2,
         n_columns,
         figure=fig,
-        height_ratios=[1.6, 2.8],
+        height_ratios=[1.9, 2.8],
         hspace=0.4,
         wspace=0.2,
     )
@@ -573,9 +576,11 @@ def animate_lorenz_rho_bifurcation_comparison(
     panel_colors = plt.cm.viridis(
         np.linspace(0.05, 0.95, len(rho_values))
     )
-    trajectory_colors = sns.color_palette(
-        "husl",
+    
+    trajectory_colors = sns.husl_palette(
         n_colors=len(initial_states),
+        s=1.0,
+        l=0.82,
     )
 
     bifurcation_ax = fig.add_subplot(grid[0, :])
@@ -669,7 +674,7 @@ def animate_lorenz_rho_bifurcation_comparison(
                 [],
                 [],
                 color=color,
-                linewidth=0.1,
+                linewidth=0.2,
                 label=(
                     rf"$\vec{{r}}_0 = ({initial_states[index, 0]:g}, "
                     f"{initial_states[index, 1]:g}, "

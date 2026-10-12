@@ -51,7 +51,7 @@ fig, animation = animate_lorenz_rho_bifurcation_comparison(
     t_transient=30, 
 )
 
-# fig.savefig("Lorenz_rho_comparison_w_bifurcation.png", dpi=600, bbox_inches="tight")
+fig.savefig("Lorenz_rho_comparison_w_bifurcation_V4.png", dpi=600, bbox_inches="tight")
 
 ##### TO DO :  
    # 1. Add a function to save the animation as a video file (e.g., MP4 or GIF).        
